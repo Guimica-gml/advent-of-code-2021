@@ -13,7 +13,7 @@ fn parse_input(filepath: &str) -> Vec<i32> {
     return read_to_string(filepath).unwrap().split(",").map(|s| s.parse().unwrap()).collect();
 }
 
-fn find_smallets_fuel_consumption(positions: &Vec<i32>, f: fn(i32, i32) -> i32) -> i32 {
+fn find_smallest_fuel_consumption(positions: &Vec<i32>, f: fn(i32, i32) -> i32) -> i32 {
     let min: i32 = *positions.into_iter().min().unwrap();
     let max: i32 = *positions.into_iter().max().unwrap();
     let mut possible_positios: HashMap<i32, i32> = HashMap::new();
@@ -31,13 +31,13 @@ fn find_smallets_fuel_consumption(positions: &Vec<i32>, f: fn(i32, i32) -> i32) 
 }
 
 fn part1(positions: &Vec<i32>) -> i32 {
-    return find_smallets_fuel_consumption(positions, |current_pos: i32, target_pos: i32| -> i32 {
+    return find_smallest_fuel_consumption(positions, |current_pos: i32, target_pos: i32| -> i32 {
         i32::abs(target_pos - current_pos)
     })
 }
 
 fn part2(positions: &Vec<i32>) -> i32 {
-    return find_smallets_fuel_consumption(positions, |current_pos: i32, target_pos: i32| -> i32 {
+    return find_smallest_fuel_consumption(positions, |current_pos: i32, target_pos: i32| -> i32 {
         let mut consumption = 0;
         for amount in 0..i32::abs(target_pos - current_pos) {
             consumption += amount + 1;
