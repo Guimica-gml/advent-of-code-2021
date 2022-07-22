@@ -38,10 +38,8 @@ fn part1(positions: &Vec<i32>) -> i32 {
 
 fn part2(positions: &Vec<i32>) -> i32 {
     return find_smallest_fuel_consumption(positions, |current_pos: i32, target_pos: i32| -> i32 {
-        let mut consumption = 0;
-        for amount in 0..i32::abs(target_pos - current_pos) {
-            consumption += amount + 1;
-        }
-        return consumption;
+        let n = i32::abs(target_pos - current_pos);
+        let fuel = n * (n + 1) / 2;
+        return fuel;
     })
 }
