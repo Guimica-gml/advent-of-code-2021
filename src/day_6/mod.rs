@@ -26,17 +26,17 @@ fn simulate_population(initial_population: &Vec<i64>, days: i64) -> i64 {
     for _ in 0..days {
         for key in 0..9 {
             if key == 0 {
-                population_growth += population.get(&0).unwrap();
-                population.insert(7, population.get(&7).unwrap() + population.get(&0).unwrap());
+                population_growth += population[&0];
+                population.insert(7, population[&7] + population[&0]);
                 population.insert(0, 0);
             }
             else {
-                population.insert(key - 1, population.get(&(key - 1)).unwrap() + population.get(&key).unwrap());
+                population.insert(key - 1, population[&(key - 1)] + population[&key]);
                 population.insert(key, 0);
             }
         }
 
-        population.insert(8, population.get(&8).unwrap() + population_growth);
+        population.insert(8, population[&8] + population_growth);
         population_growth = 0;
     }
 
