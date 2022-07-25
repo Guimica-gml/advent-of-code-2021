@@ -1,4 +1,5 @@
-use std::{fs::read_to_string, collections::HashMap};
+use std::fs::read_to_string;
+use std::collections::HashMap;
 
 const INPUT_FILEPATH: &str = "./src/day_8/input.txt";
 

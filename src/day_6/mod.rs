@@ -1,4 +1,5 @@
-use std::{fs::read_to_string, collections::HashMap};
+use std::fs::read_to_string;
+use std::collections::HashMap;
 
 const INPUT_FILEPATH: &str = "./src/day_6/input.txt";
 
@@ -9,7 +10,11 @@ pub fn main() {
 }
 
 fn parse_input(filepath: &str) -> Vec<i64> {
-    return read_to_string(filepath).unwrap().split(",").map(|s| s.parse().unwrap()).collect();
+    return read_to_string(filepath)
+        .unwrap()
+        .split(",")
+        .map(|s| s.parse().unwrap())
+        .collect();
 }
 
 fn simulate_population(initial_population: &Vec<i64>, days: i64) -> i64 {
@@ -18,7 +23,7 @@ fn simulate_population(initial_population: &Vec<i64>, days: i64) -> i64 {
     ]);
 
     for fish in initial_population {
-        population.insert(*fish, population.get(fish).unwrap() + 1);
+        population.insert(*fish, population[fish] + 1);
     }
 
     let mut population_growth = 0;
