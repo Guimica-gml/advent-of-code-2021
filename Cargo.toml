@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 pad = "0.1.6"
+lazy_static = "1.4.0"
