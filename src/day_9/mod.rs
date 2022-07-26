@@ -1,8 +1,8 @@
 use std::fs::read_to_string;
 
 type HeightMap = Vec<Vec<i32>>;
-type LowPoint = (usize, usize);
-type Basin = Vec<(usize, usize)>;
+type Point = (usize, usize);
+type Basin = Vec<Point>;
 
 const INPUT_FILEPATH: &str = "./src/day_9/input.txt";
 
@@ -18,34 +18,34 @@ fn parse_input(filepath: &str) -> HeightMap {
     }).collect()
 }
 
-fn for_each_neighbor(height_map: &HeightMap, x: usize, y: usize, mut func: impl FnMut(usize, usize)) {
-    if y != 0 {
-        func(x, y - 1);
+fn for_each_neighbor(height_map: &HeightMap, point: Point, mut func: impl FnMut(Point)) {
+    if point.1 != 0 {
+        func((point.0, point.1 - 1));
     }
-    if x != 0 {
-        func(x - 1, y);
+    if point.0 != 0 {
+        func((point.0 - 1, point.1));
     }
-    if y + 1 != height_map.len() {
-        func(x, y + 1);
+    if point.1 + 1 != height_map.len() {
+        func((point.0, point.1 + 1));
     }
-    if x + 1 != height_map[0].len() {
-        func(x + 1, y);
+    if point.0 + 1 != height_map[0].len() {
+        func((point.0 + 1, point.1));
     }
 }
 
-fn is_low_point(height_map: &HeightMap, x: usize, y: usize) -> bool {
-    let value = height_map[y][x];
+fn is_low_point(height_map: &HeightMap, point: Point) -> bool {
+    let value = height_map[point.1][point.0];
     let mut neighbors: Vec<i32> = vec![];
-    for_each_neighbor(height_map, x, y, |nx, ny| neighbors.push(height_map[ny][nx]));
+    for_each_neighbor(height_map, point, |npoint| neighbors.push(height_map[npoint.1][npoint.0]));
     neighbors.into_iter().all(|neighbor| value < neighbor)
 }
 
-fn get_low_points(height_map: &HeightMap) -> Vec<LowPoint> {
+fn get_low_points(height_map: &HeightMap) -> Vec<Point> {
     let mut low_points = vec![];
 
     for (y, row) in height_map.into_iter().enumerate() {
         for (x, _) in row.into_iter().enumerate() {
-            if is_low_point(height_map, x, y) {
+            if is_low_point(height_map, (x, y)) {
                 low_points.push((x, y));
             }
         }
@@ -54,16 +54,16 @@ fn get_low_points(height_map: &HeightMap) -> Vec<LowPoint> {
     low_points
 }
 
-fn get_basin_from(height_map: &HeightMap, low_point: &LowPoint) -> Basin {
+fn get_basin_from(height_map: &HeightMap, low_point: &Point) -> Basin {
     let mut basin: Basin = vec![];
 
-    fn get_basin_from_impl(vec: &mut Basin, height_map: &HeightMap, low_point: &LowPoint) {
-        vec.push((low_point.0, low_point.1));
+    fn get_basin_from_impl(vec: &mut Basin, height_map: &HeightMap, low_point: &Point) {
+        vec.push(*low_point);
 
-        for_each_neighbor(height_map, low_point.0, low_point.1, |nx, ny| {
-            let nvalue = height_map[ny][nx];
-            if nvalue != 9 && !vec.contains(&(nx, ny)) {
-                get_basin_from_impl(vec, height_map, &(nx, ny));
+        for_each_neighbor(height_map, *low_point, |npoint| {
+            let nvalue = height_map[npoint.1][npoint.0];
+            if nvalue != 9 && !vec.contains(&npoint) {
+                get_basin_from_impl(vec, height_map, &npoint);
             }
         });
     }
