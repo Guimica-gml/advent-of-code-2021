@@ -40,18 +40,18 @@ fn is_low_point(height_map: &HeightMap, x: usize, y: usize) -> bool {
     neighbors.into_iter().all(|neighbor| value < neighbor)
 }
 
-fn part1(height_map: &HeightMap) -> i32 {
-    let mut answer = 0;
+fn get_low_points(height_map: &HeightMap) -> Vec<LowPoint> {
+    let mut low_points = vec![];
 
     for (y, row) in height_map.into_iter().enumerate() {
-        for (x, value) in row.into_iter().enumerate() {
+        for (x, _) in row.into_iter().enumerate() {
             if is_low_point(height_map, x, y) {
-                answer += *value + 1;
+                low_points.push((x, y));
             }
         }
     }
 
-    return answer;
+    low_points
 }
 
 fn get_basin_from(height_map: &HeightMap, low_point: &LowPoint) -> Basin {
@@ -72,24 +72,27 @@ fn get_basin_from(height_map: &HeightMap, low_point: &LowPoint) -> Basin {
     basin
 }
 
-fn part2(height_map: &HeightMap) -> i32 {
-    let mut low_points: Vec<LowPoint> = vec![];
-    let mut basins: Vec<Basin> = vec![];
+fn part1(height_map: &HeightMap) -> i32 {
+    let mut answer = 0;
+    let low_points = get_low_points(height_map);
 
-    for (y, row) in height_map.into_iter().enumerate() {
-        for (x, _) in row.into_iter().enumerate() {
-            if is_low_point(height_map, x, y) {
-                low_points.push((x, y));
-            }
-        }
+    for low_point in low_points {
+        answer += height_map[low_point.1][low_point.0] + 1;
     }
+
+    return answer;
+}
+
+fn part2(height_map: &HeightMap) -> i32 {
+    let low_points = get_low_points(height_map);
+    let mut basins: Vec<Basin> = vec![];
+    let mut answer = 1;
 
     for low_point in &low_points {
         basins.push(get_basin_from(height_map, low_point));
     }
 
     basins.sort_by(|a, b| b.len().cmp(&a.len()));
-    let mut answer = 1;
 
     for i in 0..3 {
         answer *= basins[i].len() as i32;
