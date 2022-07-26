@@ -12,6 +12,7 @@ mod day_8;
 mod day_9;
 mod day_10;
 mod day_11;
+mod day_12;
 
 fn main() {
     let mut args = env::args().skip(1);
@@ -36,6 +37,7 @@ fn main() {
     else if day == "9"  { day_9::main();  }
     else if day == "10" { day_10::main(); }
     else if day == "11" { day_11::main(); }
+    else if day == "12" { day_12::main(); }
     else {
         println!("Error: Command not recognized");
         process::exit(1);
