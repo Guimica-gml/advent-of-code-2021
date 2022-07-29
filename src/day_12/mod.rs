@@ -58,10 +58,9 @@ fn get_paths_from(cave_mapping: &CaveMapping, dup_small_cave: bool) -> Vec<Vec<S
     }
 
     let mut paths: Vec<Vec<String>> = vec![];
-    let init_path = vec!["start".to_string()];
     let init_visited = HashSet::from(["start".to_owned()]);
 
-    get_paths_from_impl(&mut paths, cave_mapping, init_path, init_visited, "start", dup_small_cave);
+    get_paths_from_impl(&mut paths, cave_mapping, vec![], init_visited, "start", dup_small_cave);
     paths
 }
 
