@@ -10,7 +10,7 @@ pub fn main() {
 
 fn parse_input(filepath: &str) -> Vec<i32> {
     let text = read_to_string(filepath).unwrap();
-    let numbers: Vec<i32> = text.lines().map(|s| str::parse(s).unwrap()).collect();
+    let numbers: Vec<i32> = text.lines().map(|s| s.parse().unwrap()).collect();
     return numbers;
 }
 
