@@ -1,5 +1,7 @@
 use std::fs::read_to_string;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+
+type CaveMapping = HashMap<String, Vec<String>>;
 
 const INPUT_FILEPATH: &str = "./src/day_12/input.txt";
 
@@ -9,73 +11,64 @@ pub fn main() {
     println!("The answer for part 2 is {}", part2(&cave_mapping));
 }
 
-fn parse_input(filepath: &str) -> HashMap<String, Vec<String>> {
-    let mut cave_mapping: HashMap<String, Vec<String>> = HashMap::new();
+fn parse_input(filepath: &str) -> CaveMapping {
+    let mut cave_mapping: CaveMapping = HashMap::new();
     let text = read_to_string(filepath).unwrap();
 
-    for line in text.lines().map(|s| s.to_string()).collect::<Vec<String>>() {
-        let mut path = line.split("-");
-        let entry = path.next().unwrap().to_string();
-        let exit = path.next().unwrap().to_string();
-
-        if cave_mapping.contains_key(&entry) {
-            cave_mapping.get_mut(&entry).unwrap().push(exit.clone());
-        }
-        else {
-            cave_mapping.insert(entry.clone(), vec![exit.clone()]);
-        }
-
-        if cave_mapping.contains_key(&exit) {
-            cave_mapping.get_mut(&exit).unwrap().push(entry);
-        }
-        else {
-            cave_mapping.insert(exit, vec![entry]);
-        }
+    for line in text.lines() {
+        let (entry, exit) = line.split_once("-").map(|s| (s.0.to_string(), s.1.to_string())).unwrap();
+        cave_mapping.entry(entry.clone()).or_default().push(exit.clone());
+        cave_mapping.entry(exit).or_default().push(entry);
     }
 
     cave_mapping
 }
 
-fn is_big_cave(cave: &str) -> bool {
-    cave.chars().next().unwrap().is_uppercase()
+fn is_samll_cave(cave: &str) -> bool {
+    cave.chars().next().unwrap().is_lowercase()
 }
 
-fn get_paths_from(cave_mapping: &HashMap<String, Vec<String>>) -> Vec<Vec<String>> {
-    let mut paths: Vec<Vec<String>> = vec![];
+fn get_paths_from(cave_mapping: &CaveMapping, dup_small_cave: bool) -> Vec<Vec<String>> {
+    fn get_paths_from_impl(paths: &mut Vec<Vec<String>>, cave_mapping: &CaveMapping, mut path: Vec<String>, visited: HashSet<String>, from: &str, dup_small_cave: bool) {
+        path.push(from.to_string());
 
-    fn get_paths_from_impl(paths: &mut Vec<Vec<String>>, path_info: (&mut Vec<String>, &mut Vec<String>), cave_mapping: &HashMap<String, Vec<String>>, from: &str) {
-        let (path, already_visited) = path_info;
+        if from == "end" {
+            paths.push(path);
+            return;
+        }
 
-        for possible_path in &cave_mapping[from] {
-            let mut branch = path.clone();
-            let mut already_visited_branch = already_visited.clone();
+        for to in &cave_mapping[from] {
+            let mut visited = visited.clone();
+            let mut dup_small_cave = dup_small_cave;
 
-            if already_visited_branch.contains(&possible_path) {
-                if possible_path == "end" {
-                    path.push("end".to_string());
+            if is_samll_cave(to) {
+                if visited.contains(to) {
+                    if dup_small_cave && to != "start" && to != "end" {
+                        dup_small_cave = false;
+                    }
+                    else {
+                        continue;
+                    }
                 }
-                continue;
+                visited.insert(to.clone());
             }
 
-            if !is_big_cave(&possible_path) {
-                already_visited_branch.push(possible_path.clone());
-            }
-
-            branch.push(possible_path.clone());
-            get_paths_from_impl(paths, (&mut branch, &mut already_visited_branch), cave_mapping, &possible_path);
-            paths.push(branch);
+            get_paths_from_impl(paths, cave_mapping, path.clone(), visited, to, dup_small_cave);
         }
     }
 
-    get_paths_from_impl(&mut paths, (&mut vec!["start".to_string()], &mut vec!["start".to_string(), "end".to_string()]), cave_mapping, "start");
-    paths.into_iter().filter(|e| e.last().unwrap() == "end").collect()
+    let mut paths: Vec<Vec<String>> = vec![];
+    let init_path = vec!["start".to_string()];
+    let init_visited = HashSet::from(["start".to_owned()]);
+
+    get_paths_from_impl(&mut paths, cave_mapping, init_path, init_visited, "start", dup_small_cave);
+    paths
 }
 
-fn part1(cave_mapping: &HashMap<String, Vec<String>>) -> i32 {
-    let paths = get_paths_from(cave_mapping);
-    return paths.len() as i32;
+fn part1(cave_mapping: &CaveMapping) -> usize {
+    get_paths_from(cave_mapping, false).len()
 }
 
-fn part2(_cave_mapping: &HashMap<String, Vec<String>>) -> i32 {
-    return 0;
+fn part2(cave_mapping: &CaveMapping) -> usize {
+    get_paths_from(cave_mapping, true).len()
 }
