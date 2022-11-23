@@ -8,5 +8,5 @@ So expect some good code reading this<br>
 
 ## Quick start
 ```
-cargo run [day]
+cargo run
 ```
