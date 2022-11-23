@@ -1,5 +1,5 @@
 use std::fs::read_to_string;
-use std::fmt::Display;
+use std::fmt::{self, Display};
 use pad::{self, PadStr};
 
 const INPUT_FILEPATH: &str = "./input.txt";
@@ -8,17 +8,17 @@ const INPUT_FILEPATH: &str = "./input.txt";
 struct Table {
     width: usize,
     height: usize,
-    values: Vec<i32>,
-    marked_values: Vec<i32>,
+    numbers: Vec<i32>,
+    marked_numbers: Vec<i32>,
     closed: bool,
 }
 
 impl Display for Table {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut text = String::new();
 
         let mut i = 0;
-        for value in &self.values {
+        for value in &self.numbers {
             text += &format!("{}", value.to_string().pad_to_width_with_alignment(3, pad::Alignment::Right));
             text += " |";
             i += 1;
@@ -33,10 +33,10 @@ impl Display for Table {
 }
 
 impl Table {
-    fn from(text: &str) -> Table {
-        return Table {
-            values: text.split_ascii_whitespace().map(|s| s.parse().unwrap()).collect::<Vec<i32>>(),
-            marked_values: vec![],
+    fn from(text: &str) -> Self {
+        return Self {
+            numbers: text.split_ascii_whitespace().map(|s| s.parse().unwrap()).collect::<Vec<i32>>(),
+            marked_numbers: vec![],
             width: 5,
             height: 5,
             closed: false,
@@ -44,8 +44,8 @@ impl Table {
     }
 
     fn mark(&mut self, number: i32) {
-        if self.values.contains(&number) {
-            self.marked_values.push(number);
+        if self.numbers.contains(&number) {
+            self.marked_numbers.push(number);
         }
     }
 
@@ -53,8 +53,8 @@ impl Table {
         for y in 0..self.height {
             let mut bingo = true;
             for x in 0..self.width {
-                let value = self.values[(y * self.width) + x];
-                if !self.marked_values.contains(&value) {
+                let value = self.numbers[(y * self.width) + x];
+                if !self.marked_numbers.contains(&value) {
                     bingo = false;
                 }
                 if !bingo { break; }
@@ -68,8 +68,8 @@ impl Table {
         for x in 0..self.width {
             let mut bingo = true;
             for y in 0..self.height {
-                let value = self.values[(y * self.width) + x];
-                if !self.marked_values.contains(&value) {
+                let value = self.numbers[(y * self.width) + x];
+                if !self.marked_numbers.contains(&value) {
                     bingo = false;
                 }
                 if !bingo { break; }
@@ -83,10 +83,10 @@ impl Table {
         return false;
     }
 
-    fn get_unmarked_value(&self) -> Vec<i32> {
+    fn get_unmarked_numbers(&self) -> Vec<i32> {
         let mut unmarked = vec![];
-        for value in &self.values {
-            if !self.marked_values.contains(value) {
+        for value in &self.numbers {
+            if !self.marked_numbers.contains(value) {
                 unmarked.push(value.clone());
             }
         }
@@ -102,7 +102,7 @@ struct BingoGame {
 }
 
 impl BingoGame {
-    fn from_file(filepath: &str) -> BingoGame {
+    fn from_file(filepath: &str) -> Self {
         let text_bocks: Vec<String> = read_to_string(filepath)
             .unwrap()
             .split("\r\n\r\n")
@@ -112,16 +112,11 @@ impl BingoGame {
         let steps = text_bocks[0].split(",").map(|s| s.parse().unwrap()).collect();
         let tables = text_bocks[1..].into_iter().map(|text| Table::from(text)).collect();
 
-        return BingoGame { tables, steps, step_index: 0 };
+        Self { tables, steps, step_index: 0 }
     }
 
     fn game_ended(&self) -> bool {
-        for table in &self.tables {
-            if !table.closed {
-                return false;
-            }
-        }
-        return true;
+        self.tables.iter().all(|table| table.closed)
     }
 
     fn play(&mut self) -> (Vec<Table>, Vec<i32>) {
@@ -159,23 +154,15 @@ pub fn main() {
 }
 
 fn part1(mut bingo_game: BingoGame) -> i32 {
-    let unmarked_values: i32;
-    let last_number: i32;
-
     let (tables, numbers) = bingo_game.play();
-    unmarked_values = tables.first().unwrap().get_unmarked_value().into_iter().sum();
-    last_number = numbers.first().unwrap().clone();
-
-    return unmarked_values * last_number;
+    let unmarked_numbers: i32 = tables.first().unwrap().get_unmarked_numbers().into_iter().sum();
+    let last_number = numbers.first().unwrap().clone();
+    unmarked_numbers * last_number
 }
 
 fn part2(mut bingo_game: BingoGame) -> i32 {
-    let unmarked_values: i32;
-    let last_number: i32;
-
     let (tables, numbers) = bingo_game.play();
-    unmarked_values = tables.last().unwrap().get_unmarked_value().into_iter().sum();
-    last_number = numbers.last().unwrap().clone();
-
-    return unmarked_values * last_number;
+    let unmarked_values: i32 = tables.last().unwrap().get_unmarked_numbers().into_iter().sum();
+    let last_number = numbers.last().unwrap().clone();
+    unmarked_values * last_number
 }
